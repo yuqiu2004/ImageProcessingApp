@@ -8,106 +8,91 @@ namespace ImageProcessingApp.Utils
         /// <summary>
         /// 将图片转换为灰度图并保存到指定目录
         /// </summary>
-        public static bool ConvertToGray(string inputPath, string outputDirectory)
+        public static string ConvertToGray(string inputPath, string outputDirectory)
         {
             try {
                 Mat input = Cv2.ImRead(inputPath);
-                if (input.Empty()) return false;
-
+                if (input.Empty()) return "";
                 Mat gray = new Mat();
                 Cv2.CvtColor(input, gray, ColorConversionCodes.BGR2GRAY);
-
                 string outputPath = GetModifiedFilePath(inputPath, outputDirectory, "_gray");
                 Cv2.ImWrite(outputPath, gray);
-                return true;
+                return outputPath;
             } catch (Exception ex) {
-                return false;
+                return "";
             }
         }
 
         /// <summary>
         /// 将图片放大至200%并保存到指定目录
         /// </summary>
-        public static bool EnlargeTo200Percent(string inputPath, string outputDirectory)
+        public static string EnlargeTo200Percent(string inputPath, string outputDirectory)
         {
             try  {
                 Mat input = Cv2.ImRead(inputPath);
-                if (input.Empty()) return false;
-
+                if (input.Empty()) return "";
                 Mat enlarged = new Mat();
                 Cv2.Resize(input, enlarged, new Size(input.Width * 2, input.Height * 2));
-
                 string outputPath = GetModifiedFilePath(inputPath, outputDirectory, "_enlarged");
                 Cv2.ImWrite(outputPath, enlarged);
-                return true;
+                return outputPath;
             } catch (Exception ex) {
-                return false;
+                return "";
             }
         }
 
         /// <summary>
         /// 将图片缩小至50%并保存到指定目录
         /// </summary>
-        public static bool ShrinkTo50Percent(string inputPath, string outputDirectory)
+        public static string ShrinkTo50Percent(string inputPath, string outputDirectory)
         {
             try {
                 Mat input = Cv2.ImRead(inputPath);
-                if (input.Empty()) return false;
-
+                if (input.Empty()) return "";
                 Mat shrunk = new Mat();
                 Cv2.Resize(input, shrunk, new Size(input.Width / 2, input.Height / 2));
-
                 string outputPath = GetModifiedFilePath(inputPath, outputDirectory, "_shrunk");
                 Cv2.ImWrite(outputPath, shrunk);
-
-                Console.WriteLine($"缩小处理完成，保存至：{outputPath}");
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"缩小处理失败：{ex.Message}");
-                return false;
+                return outputPath;
+            } catch (Exception ex) {
+                return "";
             }
         }
 
         /// <summary>
         /// 顺时针旋转90°并保存到指定目录
         /// </summary>
-        public static bool RotateClockwise90(string inputPath, string outputDirectory)
+        public static string RotateClockwise90(string inputPath, string outputDirectory)
         {
             try
             {
                 Mat input = Cv2.ImRead(inputPath);
-                if (input.Empty()) return false;
-
+                if (input.Empty()) return "";
                 Mat rotated = new Mat();
                 Cv2.Rotate(input, rotated, RotateFlags.Rotate90Clockwise);
-
                 string outputPath = GetModifiedFilePath(inputPath, outputDirectory, "_rotated_cw");
                 Cv2.ImWrite(outputPath, rotated);
-                return true;
+                return outputPath;
             } catch (Exception ex) {
-                return false;
+                return "";
             }
         }
 
         /// <summary>
         /// 逆时针旋转90°并保存到指定目录
         /// </summary>
-        public static bool RotateCounterClockwise90(string inputPath, string outputDirectory)
+        public static string RotateCounterClockwise90(string inputPath, string outputDirectory)
         {
             try {
                 Mat input = Cv2.ImRead(inputPath);
-                if (input.Empty()) return false;
-
+                if (input.Empty()) return "";
                 Mat rotated = new Mat();
                 Cv2.Rotate(input, rotated, RotateFlags.Rotate90Counterclockwise);
-
                 string outputPath = GetModifiedFilePath(inputPath, outputDirectory, "_rotated_ccw");
                 Cv2.ImWrite(outputPath, rotated);
-                return true;
+                return outputPath;
             } catch (Exception ex) {
-                return false;
+                return "";
             }
         }
 

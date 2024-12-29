@@ -85,7 +85,7 @@ namespace ImageProcessingApp.Views
                 string outputPath = @"C:\Users\SN\Desktop\temp";
                 string inputPath = ((FileItem)FileListBox.Items[i]).FilePath;
                 //MessageBox.Show(inputPath);
-                if (ImageProcessor.ConvertToGray(inputPath, outputPath)) ProcessingProgressBar.Value += 1;
+                if ("" != ImageProcessor.ConvertToGray(inputPath, outputPath)) ProcessingProgressBar.Value += 1;
                 else MessageBox.Show("error");
             }
 
