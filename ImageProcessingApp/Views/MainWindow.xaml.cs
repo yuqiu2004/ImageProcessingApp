@@ -3,6 +3,7 @@ using System.Windows;
 using ImageProcessingApp.Utils;
 using ImageProcessingApp.Models;
 using System.Collections.ObjectModel;
+using System.Windows.Controls;
 
 namespace ImageProcessingApp.Views
 {
@@ -58,13 +59,20 @@ namespace ImageProcessingApp.Views
 
         private void StartProcessing_Click(object sender, RoutedEventArgs e)
         {
+            OpenFolderDialog folder = new OpenFolderDialog()
+            {
+                Title = "选择输出路径",
+            };
+            if (folder.ShowDialog() == false) {
+                MessageBox.Show("系统出错");
+                return;
+            }
             if (FileListBox.Items.Count == 0)
             {
                 StatusTextBlock.Text = "请先添加文件。";
                 MessageBox.Show("请先添加文件。", "提示");
                 return;
             }
-
             if (ProcessingModeComboBox.SelectedItem == null)
             {
                 StatusTextBlock.Text = "请选择处理模式。";
@@ -75,18 +83,43 @@ namespace ImageProcessingApp.Views
             ProcessingProgressBar.Value = 0;
             ProcessingProgressBar.Maximum = FileListBox.Items.Count;
             StatusTextBlock.Text = "处理中...";
-
-            //string mode = (ProcessingModeComboBox.SelectedItem as ComboBoxItem)?.Content.ToString();
+            //string outputPath = @"C:\Users\SN\Desktop\temp";
+            string outputDir = folder.FolderName;
+            string mode = (ProcessingModeComboBox.SelectedItem as ComboBoxItem)?.Content.ToString();
             for (int i = 0; i < FileListBox.Items.Count; i++)
             {
-                // 模拟处理每个文件
-                //System.Threading.Thread.Sleep(500); // 替换为实际的处理逻辑
-                //FileListBox.Items[i] = FileListBox.Items[i].ToString().Replace("[ 待处理 ]", "[ 已处理 ]");
-                string outputPath = @"C:\Users\SN\Desktop\temp";
-                string inputPath = ((FileItem)FileListBox.Items[i]).FilePath;
-                //MessageBox.Show(inputPath);
-                if ("" != ImageProcessor.ConvertToGray(inputPath, outputPath)) ProcessingProgressBar.Value += 1;
-                else MessageBox.Show("error");
+                var item = (FileItem)FileListBox.Items[i];
+                string inputPath = item.FilePath;
+                string outputPath = "";
+                if (mode.Equals("灰度"))
+                {
+                    outputPath = ImageProcessor.ConvertToGray(inputPath, outputDir);
+                } 
+                else if (mode.Equals("放大 200%"))
+                {
+                    outputPath = ImageProcessor.EnlargeTo200Percent(inputPath, outputDir);
+                }
+                else if (mode.Equals("缩小 50%"))
+                {
+                    outputPath = ImageProcessor.ShrinkTo50Percent(inputPath, outputDir);
+                }
+                else if (mode.Equals("顺时针旋转90°"))
+                {
+                    outputPath = ImageProcessor.RotateClockwise90(inputPath, outputDir);
+                }
+                else if (mode.Equals("逆时针旋转90°"))
+                {
+                    outputPath = ImageProcessor.RotateCounterClockwise90(inputPath, outputDir);
+                }
+                if (!String.IsNullOrEmpty(outputPath))
+                {
+                    item.Status = Status.COMPLETED;
+                    ProcessingProgressBar.Value += 1;
+                }
+                else
+                {
+                    item.Status = Status.FAILED;
+                }
             }
 
             StatusTextBlock.Text = "处理完成！";
