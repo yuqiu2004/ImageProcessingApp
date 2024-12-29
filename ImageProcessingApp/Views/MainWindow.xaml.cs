@@ -83,10 +83,10 @@ namespace ImageProcessingApp.Views
         // 删除文件项
         private void DeleteFile_Click(object sender, RoutedEventArgs e)
         {
-            var selectedItems = FileListBox.SelectedItems;
-            while (selectedItems.Count > 0)
+            var selectedItems = FileListBox.SelectedItems.Cast<FileItem>().ToList();
+            foreach (var item in selectedItems)
             {
-                FileListBox.Items.Remove(selectedItems[0]);
+                FileItems.Remove(item);
             }
         }
 
@@ -145,7 +145,7 @@ namespace ImageProcessingApp.Views
                     {
                         string inputPath = item.FilePath;
                         string outputPath = ProcessImage(inputPath, mode, outputDir);
-
+                        Thread.Sleep(1000); // 方便测试
                         if (!string.IsNullOrEmpty(outputPath))
                         {
                             item.Status = Status.COMPLETED;
