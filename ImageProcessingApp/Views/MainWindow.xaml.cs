@@ -68,7 +68,8 @@ namespace ImageProcessingApp.Views
             {
                 Title = "选择输出路径",
             };
-            if (folder.ShowDialog() == false) {
+            if (folder.ShowDialog() == false)
+            {
                 MessageBox.Show("系统出错");
                 return;
             }
@@ -91,25 +92,50 @@ namespace ImageProcessingApp.Views
             //string outputPath = @"C:\Users\SN\Desktop\temp";
             string outputDir = folder.FolderName;
             string mode = (ProcessingModeComboBox.SelectedItem as ComboBoxItem)?.Content.ToString();
-            for (int i = 0; i < FileItems.Count; i++)
+
+            // 为每个文件启动一个独立线程
+            foreach (var item in FileItems)
             {
-                var item = FileItems[i];
-                string inputPath = item.FilePath;
-                string outputPath = ProcessImage(inputPath, mode, outputDir);
-                
-                if (!String.IsNullOrEmpty(outputPath))
+                Thread processingThread = new Thread(() =>
                 {
-                    item.Status = Status.COMPLETED;
-                    item.OutputPath = outputPath;
-                    ProcessingProgressBar.Value += 1;
-                }
-                else
-                {
-                    item.Status = Status.FAILED;
-                }
+                    try
+                    {
+                        string inputPath = item.FilePath;
+                        string outputPath = ProcessImage(inputPath, mode, outputDir);
+
+                        if (!string.IsNullOrEmpty(outputPath))
+                        {
+                            item.Status = Status.COMPLETED;
+                            item.OutputPath = outputPath;
+
+                            // 使用 Dispatcher 更新进度条和UI
+                            Dispatcher.Invoke(() =>
+                            {
+                                ProcessingProgressBar.Value += 1;
+                                if (ProcessingProgressBar.Value == FileItems.Count) StatusTextBlock.Text = "处理完成";
+                            });
+                        }
+                        else
+                        {
+                            item.Status = Status.FAILED;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        item.Status = Status.FAILED;
+                    }
+                    finally
+                    {
+                        // 使用 Dispatcher 更新UI显示状态
+                        //Dispatcher.Invoke(() =>
+                        //{
+                        //    FileListBox.Items.Refresh();
+                        //});
+                    }
+                });
+                processingThread.IsBackground = true;
+                processingThread.Start();
             }
-            StatusTextBlock.Text = "处理完成！";
-            MessageBox.Show("处理完成！");
         }
 
         // 处理调用
