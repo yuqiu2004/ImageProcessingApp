@@ -45,12 +45,15 @@
                 <Label Content="选择处理模式：" HorizontalAlignment="Left" VerticalAlignment="Top"
                        Margin="20,150,0,0" />
                 <ComboBox x:Name="ProcessingModeComboBox" HorizontalAlignment="Left" VerticalAlignment="Top"
-                          Width="120" Height="30" Margin="150,150,0,0">
+                          Width="120" Height="30" Margin="150,150,0,0" SelectedIndex="0">
                     <ComboBoxItem Content="灰度" />
                     <ComboBoxItem Content="放大 200%" />
                     <ComboBoxItem Content="缩小 50%" />
                     <ComboBoxItem Content="顺时针旋转90°" />
                     <ComboBoxItem Content="逆时针旋转90°" />
+                    <ComboBoxItem Content="高斯模糊" />
+                    <ComboBoxItem Content="边缘检测" />
+                    <ComboBoxItem Content="对比度增强" />
                 </ComboBox>
 
                 <!-- 开始处理 -->

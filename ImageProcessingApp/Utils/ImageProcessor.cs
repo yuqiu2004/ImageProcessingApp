@@ -108,5 +108,79 @@ namespace ImageProcessingApp.Utils
             string outputFileName = $"{fileNameWithoutExtension}{suffix}_{timestamp}{extension}";
             return Path.Combine(outputDirectory, outputFileName);
         }
+
+        /// <summary>
+        /// 对图片应用高斯模糊并保存到指定目录
+        /// </summary>
+        public static string ApplyGaussianBlur(string inputPath, string outputDirectory)
+        {
+            try
+            {
+                Mat input = Cv2.ImRead(inputPath);
+                if (input.Empty()) return "";
+                Mat blurred = new Mat();
+                Cv2.GaussianBlur(input, blurred, new Size(15, 15), 0); // 内核大小和标准差可调整
+                string outputPath = GetModifiedFilePath(inputPath, outputDirectory, "_gaussian");
+                Cv2.ImWrite(outputPath, blurred);
+                return outputPath;
+            }
+            catch (Exception ex)
+            {
+                return "";
+            }
+        }
+
+        /// <summary>
+        /// 对图片执行边缘检测并保存到指定目录
+        /// </summary>
+        public static string ApplyEdgeDetection(string inputPath, string outputDirectory)
+        {
+            try
+            {
+                Mat input = Cv2.ImRead(inputPath);
+                if (input.Empty()) return "";
+                Mat gray = new Mat();
+                Cv2.CvtColor(input, gray, ColorConversionCodes.BGR2GRAY); // 边缘检测前需灰度化
+                Mat edges = new Mat();
+                Cv2.Canny(gray, edges, 100, 200); // 低阈值和高阈值可调整
+                string outputPath = GetModifiedFilePath(inputPath, outputDirectory, "_edges");
+                Cv2.ImWrite(outputPath, edges);
+                return outputPath;
+            }
+            catch (Exception ex)
+            {
+                return "";
+            }
+        }
+
+        /// <summary>
+        /// 增强图片对比度（直方图均衡化）并保存到指定目录
+        /// </summary>
+        public static string EnhanceContrast(string inputPath, string outputDirectory)
+        {
+            try
+            {
+                Mat input = Cv2.ImRead(inputPath);
+                if (input.Empty()) return "";
+
+                // 转为灰度图
+                Mat gray = new Mat();
+                Cv2.CvtColor(input, gray, ColorConversionCodes.BGR2GRAY);
+
+                // 应用直方图均衡化
+                Mat enhanced = new Mat();
+                Cv2.EqualizeHist(gray, enhanced);
+
+                string outputPath = GetModifiedFilePath(inputPath, outputDirectory, "_enhanced");
+                Cv2.ImWrite(outputPath, enhanced);
+
+                return outputPath;
+            }
+            catch (Exception ex)
+            {
+                return "";
+            }
+        }
+
     }
 }

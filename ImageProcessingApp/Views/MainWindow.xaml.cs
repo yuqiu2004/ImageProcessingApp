@@ -152,6 +152,9 @@ namespace ImageProcessingApp.Views
                 "缩小 50%" => ImageProcessor.ShrinkTo50Percent(inputPath, outputDir),
                 "顺时针旋转90°" => ImageProcessor.RotateClockwise90(inputPath, outputDir),
                 "逆时针旋转90°" => ImageProcessor.RotateCounterClockwise90(inputPath, outputDir),
+                "高斯模糊" => ImageProcessor.ApplyGaussianBlur(inputPath, outputDir),
+                "边缘检测" => ImageProcessor.ApplyEdgeDetection(inputPath, outputDir),
+                "对比度增强" => ImageProcessor.EnhanceContrast(inputPath, outputDir),
                 _ => null,
             };
         }
