@@ -4,6 +4,8 @@ using ImageProcessingApp.Utils;
 using ImageProcessingApp.Models;
 using System.Collections.ObjectModel;
 using System.Windows.Controls;
+using System.Runtime.InteropServices;
+using System.Windows.Interop;
 
 namespace ImageProcessingApp.Views
 {
@@ -12,9 +14,49 @@ namespace ImageProcessingApp.Views
     /// </summary>
     public partial class MainWindow : Window
     {
+
+        private const int WM_USER_PROGRESS = 0x0400; // 自定义消息
+
+        private IntPtr _windowHandle;
+
+        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            _windowHandle = new WindowInteropHelper(this).Handle;
+
+            // 添加消息钩子
+            HwndSource source = HwndSource.FromHwnd(_windowHandle);
+            source.AddHook(WndProc);
+        }
+
+        // 消息处理函数
+        private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+        {
+            if (msg == WM_USER_PROGRESS)
+            {
+                // 获取进度
+                int completed = wParam.ToInt32();
+                UpdateProgress(completed);
+                handled = true;
+            }
+            return IntPtr.Zero;
+        }
+
+        private void UpdateProgress(int completed)
+        {
+            ProcessingProgressBar.Value = completed;
+
+            if (completed == FileItems.Count)
+            {
+                StatusTextBlock.Text = "处理完成";
+                MessageBox.Show("所有文件处理完成！", "提示");
+            }
+        }
+
         public MainWindow()
         {
             InitializeComponent();
+            // 初始化窗口句柄
+            Loaded += MainWindow_Loaded;
             this.DataContext = this;
             FileListBox.ItemsSource = FileItems; // 绑定数据源
         }
@@ -92,6 +134,7 @@ namespace ImageProcessingApp.Views
             //string outputPath = @"C:\Users\SN\Desktop\temp";
             string outputDir = folder.FolderName;
             string mode = (ProcessingModeComboBox.SelectedItem as ComboBoxItem)?.Content.ToString();
+            int completedCount = 0;
 
             // 为每个文件启动一个独立线程
             foreach (var item in FileItems)
@@ -107,13 +150,10 @@ namespace ImageProcessingApp.Views
                         {
                             item.Status = Status.COMPLETED;
                             item.OutputPath = outputPath;
+                            Interlocked.Increment(ref completedCount);
 
-                            // 使用 Dispatcher 更新进度条和UI
-                            Dispatcher.Invoke(() =>
-                            {
-                                ProcessingProgressBar.Value += 1;
-                                if (ProcessingProgressBar.Value == FileItems.Count) StatusTextBlock.Text = "处理完成";
-                            });
+                            // 使用 PostMessage 发送更新进度的消息
+                            PostMessage(_windowHandle, WM_USER_PROGRESS, new IntPtr(completedCount), IntPtr.Zero);
                         }
                         else
                         {
@@ -124,19 +164,14 @@ namespace ImageProcessingApp.Views
                     {
                         item.Status = Status.FAILED;
                     }
-                    finally
-                    {
-                        // 使用 Dispatcher 更新UI显示状态
-                        //Dispatcher.Invoke(() =>
-                        //{
-                        //    FileListBox.Items.Refresh();
-                        //});
-                    }
                 });
                 processingThread.IsBackground = true;
                 processingThread.Start();
             }
         }
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        private static extern bool PostMessage(IntPtr hWnd, int Msg, IntPtr wParam, IntPtr lParam);
 
         // 处理调用
         private string ProcessImage(string inputPath, string mode, string outputDir)
