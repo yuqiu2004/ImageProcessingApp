@@ -1,17 +1,8 @@
 ﻿using Microsoft.Win32;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
+using ImageProcessingApp.Utils;
+using ImageProcessingApp.Models;
+using System.Collections.ObjectModel;
 
 namespace ImageProcessingApp.Views
 {
@@ -23,7 +14,10 @@ namespace ImageProcessingApp.Views
         public MainWindow()
         {
             InitializeComponent();
+            FileListBox.ItemsSource = FileItems; // 绑定数据源
         }
+
+        private ObservableCollection<FileItem> FileItems { get; set; } = new ObservableCollection<FileItem>();
 
         private void AddImage_Click(object sender, RoutedEventArgs e)
         {
@@ -36,7 +30,7 @@ namespace ImageProcessingApp.Views
             {
                 foreach (string filename in openFileDialog.FileNames)
                 {
-                    FileListBox.Items.Add($"{filename} [待处理]");
+                    FileItems.Add(new FileItem { FilePath = filename, Status = Status.PENDING });
                 }
             }
         }
@@ -66,25 +60,48 @@ namespace ImageProcessingApp.Views
         {
             if (FileListBox.Items.Count == 0)
             {
+                StatusTextBlock.Text = "请先添加文件。";
                 MessageBox.Show("请先添加文件。", "提示");
                 return;
             }
 
-            string mode = (ProcessingModeComboBox.SelectedItem as ComboBoxItem)?.Content.ToString() ?? "默认模式";
-            MessageBox.Show($"开始处理文件，模式：{mode}。", "提示");
+            if (ProcessingModeComboBox.SelectedItem == null)
+            {
+                StatusTextBlock.Text = "请选择处理模式。";
+                MessageBox.Show("请选择处理模式。", "提示");
+                return;
+            }
+
+            ProcessingProgressBar.Value = 0;
+            ProcessingProgressBar.Maximum = FileListBox.Items.Count;
+            StatusTextBlock.Text = "处理中...";
+
+            //string mode = (ProcessingModeComboBox.SelectedItem as ComboBoxItem)?.Content.ToString();
             for (int i = 0; i < FileListBox.Items.Count; i++)
             {
-                FileListBox.Items[i] = FileListBox.Items[i].ToString().Replace("[待处理]", "[处理中]");
+                // 模拟处理每个文件
+                //System.Threading.Thread.Sleep(500); // 替换为实际的处理逻辑
+                //FileListBox.Items[i] = FileListBox.Items[i].ToString().Replace("[ 待处理 ]", "[ 已处理 ]");
+                string outputPath = @"C:\Users\SN\Desktop\temp";
+                string inputPath = ((FileItem)FileListBox.Items[i]).FilePath;
+                //MessageBox.Show(inputPath);
+                if (ImageProcessor.ConvertToGray(inputPath, outputPath)) ProcessingProgressBar.Value += 1;
+                else MessageBox.Show("error");
             }
+
+            StatusTextBlock.Text = "处理完成！";
+            //MessageBox.Show($"所有文件处理完成，模式：{mode}。", "提示");
         }
 
         private void CancelProcessing_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("取消处理。", "提示");
+            ProcessingProgressBar.Value = 0;
+            StatusTextBlock.Text = "已取消处理。";
             for (int i = 0; i < FileListBox.Items.Count; i++)
             {
-                FileListBox.Items[i] = FileListBox.Items[i].ToString().Replace("[处理中]", "[待处理]");
+                FileListBox.Items[i] = ((FileItem)FileListBox.Items[i]).Status = Status.CANCELED;
             }
         }
+
     }
 }

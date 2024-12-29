@@ -3,41 +3,65 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:ImageProcessingApp.Views"
         mc:Ignorable="d"
-        Title="ImageProcessingApp" Height="450" Width="800">
+        Title="ImageProcessApp" Height="500" Width="900">
     <Grid>
-        <!-- 文件列表 -->
-        <ListBox x:Name="FileListBox" HorizontalAlignment="Left" VerticalAlignment="Top" 
-                 Width="300" Height="250" Margin="20,20,0,0">
-        </ListBox>
+        <!-- 文件列表分组 -->
+        <GroupBox Header="文件列表" HorizontalAlignment="Left" VerticalAlignment="Top"
+                  Width="350" Height="400" Margin="20,20,0,0">
+            <Grid>
+                <ListBox x:Name="FileListBox" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
+                         Margin="10" />
+            </Grid>
+        </GroupBox>
 
-        <!-- 添加图片按钮 -->
-        <Button Content="+ 添加图像" HorizontalAlignment="Left" VerticalAlignment="Top"
-                Width="100" Height="30" Margin="340,20,0,0" Click="AddImage_Click" />
+        <!-- 操作区域分组 -->
+        <GroupBox Header="操作区域" HorizontalAlignment="Right" VerticalAlignment="Top"
+                  Width="500" Height="400" Margin="0,20,20,0">
+            <Grid>
+                <!-- 添加图片 -->
+                <Button Content="+ 添加图像" HorizontalAlignment="Left" VerticalAlignment="Top"
+                        Width="120" Height="40" Margin="20,20,0,0" Click="AddImage_Click" />
 
-        <!-- 删除选中的文件按钮 -->
-        <Button Content="删除选中的文件" HorizontalAlignment="Left" VerticalAlignment="Top"
-                Width="150" Height="30" Margin="340,70,0,0" Click="DeleteFile_Click" />
+                <!-- 删除文件 -->
+                <Button Content="删除选中的文件" HorizontalAlignment="Left" VerticalAlignment="Top"
+                        Width="150" Height="40" Margin="160,20,0,0" Click="DeleteFile_Click" />
 
-        <!-- 查看选中文件的处理结果按钮 -->
-        <Button Content="查看选中文件的处理结果" HorizontalAlignment="Left" VerticalAlignment="Top"
-                Width="200" Height="30" Margin="340,120,0,0" Click="ViewResult_Click" />
+                <!-- 查看处理结果 -->
+                <Button Content="查看处理结果" HorizontalAlignment="Left" VerticalAlignment="Top"
+                        Width="150" Height="40" Margin="20,80,0,0" Click="ViewResult_Click" />
 
-        <!-- 处理模式下拉框 -->
-        <ComboBox x:Name="ProcessingModeComboBox" HorizontalAlignment="Left" VerticalAlignment="Top" 
-                  Width="100" Height="30" Margin="20,290,0,0">
-            <ComboBoxItem Content="灰度" />
-            <ComboBoxItem Content="二值化" />
-            <ComboBoxItem Content="锐化" />
-        </ComboBox>
+                <!-- 处理模式选择 -->
+                <Label Content="选择处理模式：" HorizontalAlignment="Left" VerticalAlignment="Top"
+                       Margin="20,150,0,0" />
+                <ComboBox x:Name="ProcessingModeComboBox" HorizontalAlignment="Left" VerticalAlignment="Top"
+                          Width="120" Height="30" Margin="150,150,0,0">
+                    <ComboBoxItem Content="灰度" />
+                    <ComboBoxItem Content="放大 200%" />
+                    <ComboBoxItem Content="缩小 50%" />
+                    <ComboBoxItem Content="顺时针旋转90°" />
+                    <ComboBoxItem Content="逆时针旋转90°" />
+                </ComboBox>
 
-        <!-- 开始处理按钮 -->
-        <Button Content="开始处理" HorizontalAlignment="Left" VerticalAlignment="Top"
-                Width="100" Height="30" Margin="150,290,0,0" Click="StartProcessing_Click" />
+                <!-- 开始处理 -->
+                <Button Content="开始处理" HorizontalAlignment="Left" VerticalAlignment="Top"
+                        Width="120" Height="40" Margin="20,220,0,0" Click="StartProcessing_Click" />
 
-        <!-- 取消处理按钮 -->
-        <Button Content="取消处理" HorizontalAlignment="Left" VerticalAlignment="Top"
-                Width="100" Height="30" Margin="270,290,0,0" Click="CancelProcessing_Click" />
+                <!-- 取消处理 -->
+                <Button Content="取消处理" HorizontalAlignment="Left" VerticalAlignment="Top"
+                        Width="120" Height="40" Margin="160,220,0,0" Click="CancelProcessing_Click" />
+
+                <!-- 状态显示 -->
+                <Label Content="处理状态：" HorizontalAlignment="Left" VerticalAlignment="Top"
+                       Margin="20,290,0,0" />
+                <TextBlock x:Name="StatusTextBlock" Text="等待操作..." HorizontalAlignment="Left"
+                           VerticalAlignment="Top" Margin="150,290,0,0" Width="300" />
+
+                <!-- 进度条 -->
+                <ProgressBar x:Name="ProcessingProgressBar" HorizontalAlignment="Left"
+                             VerticalAlignment="Top" Width="300" Height="20"
+                             Margin="20,330,0,0" />
+            </Grid>
+        </GroupBox>
     </Grid>
 </Window>
