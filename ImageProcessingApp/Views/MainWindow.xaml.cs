@@ -15,50 +15,11 @@ namespace ImageProcessingApp.Views
     public partial class MainWindow : Window
     {
 
-        private const int WM_USER_PROGRESS = 0x0400; // 自定义消息
-
-        private IntPtr _windowHandle;
-
         private ManualResetEvent globalStopSignal = new ManualResetEvent(false);
-
-        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
-        {
-            _windowHandle = new WindowInteropHelper(this).Handle;
-
-            // 添加消息钩子
-            HwndSource source = HwndSource.FromHwnd(_windowHandle);
-            source.AddHook(WndProc);
-        }
-
-        // 消息处理函数
-        private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
-        {
-            if (msg == WM_USER_PROGRESS)
-            {
-                // 获取进度
-                int completed = wParam.ToInt32();
-                UpdateProgress(completed);
-                handled = true;
-            }
-            return IntPtr.Zero;
-        }
-
-        private void UpdateProgress(int completed)
-        {
-            ProcessingProgressBar.Value = completed;
-
-            if (completed == FileItems.Count)
-            {
-                StatusTextBlock.Text = "处理完成";
-                MessageBox.Show("所有文件处理完成！", "提示");
-            }
-        }
 
         public MainWindow()
         {
             InitializeComponent();
-            // 初始化窗口句柄
-            Loaded += MainWindow_Loaded;
             this.DataContext = this;
             FileListBox.ItemsSource = FileItems; // 绑定数据源
         }
@@ -106,9 +67,10 @@ namespace ImageProcessingApp.Views
         }
 
         // 开始处理
-        private void StartProcessing_Click(object sender, RoutedEventArgs e)
+        private async void StartProcessing_Click(object sender, RoutedEventArgs e)
         {
             globalStopSignal.Reset();
+
             OpenFolderDialog folder = new OpenFolderDialog()
             {
                 Title = "选择输出路径",
@@ -118,12 +80,14 @@ namespace ImageProcessingApp.Views
                 MessageBox.Show("系统出错");
                 return;
             }
+
             if (FileListBox.Items.Count == 0)
             {
                 StatusTextBlock.Text = "请先添加文件。";
                 MessageBox.Show("请先添加文件。", "提示");
                 return;
             }
+
             if (ProcessingModeComboBox.SelectedItem == null)
             {
                 StatusTextBlock.Text = "请选择处理模式。";
@@ -134,52 +98,49 @@ namespace ImageProcessingApp.Views
             ProcessingProgressBar.Value = 0;
             ProcessingProgressBar.Maximum = FileListBox.Items.Count;
             StatusTextBlock.Text = "处理中...";
-            //string outputPath = @"C:\Users\SN\Desktop\temp";
             string outputDir = folder.FolderName;
             string mode = (ProcessingModeComboBox.SelectedItem as ComboBoxItem)?.Content.ToString();
+
             int completedCount = 0;
 
-            // 为每个文件启动一个独立线程
-            foreach (var item in FileItems)
+            // 启动任务
+            await Task.Run(() =>
             {
-                Thread processingThread = new Thread(() =>
+                foreach (var item in FileItems)
                 {
-                    try
+                    if (globalStopSignal.WaitOne(0))
                     {
-                        if (globalStopSignal.WaitOne(0))
-                        {
-                            item.Status = Status.CANCELED;
-                            return;
-                        }
-                        string inputPath = item.FilePath;
-                        string outputPath = ProcessImage(inputPath, mode, outputDir);
-                        Thread.Sleep(1000); // 方便测试
-                        if (!string.IsNullOrEmpty(outputPath))
-                        {
-                            item.Status = Status.COMPLETED;
-                            item.OutputPath = outputPath;
-                            Interlocked.Increment(ref completedCount);
-
-                            // 使用 PostMessage 发送更新进度的消息
-                            PostMessage(_windowHandle, WM_USER_PROGRESS, new IntPtr(completedCount), IntPtr.Zero);
-                        }
-                        else
-                        {
-                            item.Status = Status.FAILED;
-                        }
+                        item.Status = Status.CANCELED;
+                        continue;
                     }
-                    catch (Exception ex)
+
+                    string inputPath = item.FilePath;
+                    string outputPath = ProcessImage(inputPath, mode, outputDir);
+
+                    if (!string.IsNullOrEmpty(outputPath))
+                    {
+                        item.Status = Status.COMPLETED;
+                        item.OutputPath = outputPath;
+                        Interlocked.Increment(ref completedCount);
+
+                        // 调用 UI 线程更新进度
+                        Dispatcher.Invoke(() =>
+                        {
+                            ProcessingProgressBar.Value = completedCount;
+                            if (completedCount == FileItems.Count)
+                            {
+                                StatusTextBlock.Text = "处理完成";
+                                MessageBox.Show("所有文件处理完成！", "提示");
+                            }
+                        });
+                    }
+                    else
                     {
                         item.Status = Status.FAILED;
                     }
-                });
-                processingThread.IsBackground = true;
-                processingThread.Start();
-            }
+                }
+            });
         }
-
-        [DllImport("user32.dll", CharSet = CharSet.Auto)]
-        private static extern bool PostMessage(IntPtr hWnd, int Msg, IntPtr wParam, IntPtr lParam);
 
         // 处理调用
         private string ProcessImage(string inputPath, string mode, string outputDir)
@@ -198,7 +159,6 @@ namespace ImageProcessingApp.Views
         // 取消处理
         private void CancelProcessing_Click(object sender, RoutedEventArgs e)
         {
-            ProcessingProgressBar.Value = 0;
             StatusTextBlock.Text = "已取消处理。";
             globalStopSignal.Set();
         }
