@@ -19,6 +19,8 @@ namespace ImageProcessingApp.Views
 
         private IntPtr _windowHandle;
 
+        private ManualResetEvent globalStopSignal = new ManualResetEvent(false);
+
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             _windowHandle = new WindowInteropHelper(this).Handle;
@@ -106,6 +108,7 @@ namespace ImageProcessingApp.Views
         // 开始处理
         private void StartProcessing_Click(object sender, RoutedEventArgs e)
         {
+            globalStopSignal.Reset();
             OpenFolderDialog folder = new OpenFolderDialog()
             {
                 Title = "选择输出路径",
@@ -143,6 +146,11 @@ namespace ImageProcessingApp.Views
                 {
                     try
                     {
+                        if (globalStopSignal.WaitOne(0))
+                        {
+                            item.Status = Status.CANCELED;
+                            return;
+                        }
                         string inputPath = item.FilePath;
                         string outputPath = ProcessImage(inputPath, mode, outputDir);
                         Thread.Sleep(1000); // 方便测试
@@ -192,10 +200,7 @@ namespace ImageProcessingApp.Views
         {
             ProcessingProgressBar.Value = 0;
             StatusTextBlock.Text = "已取消处理。";
-            for (int i = 0; i < FileListBox.Items.Count; i++)
-            {
-                FileListBox.Items[i] = ((FileItem)FileListBox.Items[i]).Status = Status.CANCELED;
-            }
+            globalStopSignal.Set();
         }
 
     }
