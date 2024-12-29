@@ -58,13 +58,25 @@ namespace ImageProcessingApp.Views
         {
             if (FileListBox.SelectedItem != null)
             {
-                MessageBox.Show($"查看 {FileListBox.SelectedItem} 的处理结果。", "提示");
+                var selectedFile = (FileItem)FileListBox.SelectedItem;
+                string beforePath = selectedFile.FilePath;
+                string afterPath = selectedFile.OutputPath;
+                if (!string.IsNullOrEmpty(afterPath))
+                {
+                    DetailWindow detailsWindow = new DetailWindow(beforePath, afterPath);
+                    detailsWindow.ShowDialog();
+                }
+                else
+                {
+                    MessageBox.Show("未找到处理结果文件。", "提示");
+                }
             }
             else
             {
                 MessageBox.Show("请选择一个文件。", "提示");
             }
         }
+
 
         // 开始处理
         private async void StartProcessing_Click(object sender, RoutedEventArgs e)
@@ -166,5 +178,9 @@ namespace ImageProcessingApp.Views
             globalStopSignal.Set();
         }
 
+        private void ClearFile_Click(object sender, RoutedEventArgs e)
+        {
+            FileItems.Clear();
+        }
     }
 }
