@@ -6,6 +6,7 @@ namespace ImageProcessingApp.Models
     public class FileItem : INotifyPropertyChanged
     {
         private string? _filePath;
+        private string? _fileName;
         private string? _status;
         private string? _outputPath;
 
@@ -15,6 +16,16 @@ namespace ImageProcessingApp.Models
             set
             {
                 _filePath = value;
+                _fileName = System.IO.Path.GetFileName(value);
+            }
+        }
+
+        public string FileName
+        {
+            get => _fileName;
+            set
+            {
+                _fileName = value;
             }
         }
 

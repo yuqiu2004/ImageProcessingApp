@@ -15,7 +15,7 @@
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="{Binding FilePath}" />
+                                <TextBlock Text="{Binding FileName}" />
                                 <TextBlock Text=" -----> " />
                                 <TextBlock Text="{Binding Status}" />
                             </StackPanel>
