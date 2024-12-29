@@ -88,12 +88,24 @@
             <Grid>
                 <ListBox x:Name="FileListBox" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
                          Margin="10" ItemsSource="{Binding FileItems}" SelectionMode="Extended" FontFamily="YouYuan" Foreground="#FF242222" FontSize="14">
+                    <ListBox.Template>
+                        <ControlTemplate TargetType="ListBox">
+                            <ScrollViewer HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Auto">
+                                <ItemsPresenter />
+                            </ScrollViewer>
+                        </ControlTemplate>
+                    </ListBox.Template>
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="{Binding FileName}" Style="{StaticResource CustomTextBlockStyle}" />
-                                <TextBlock Text=" -----> " />
-                                <TextBlock Text="{Binding Status}" Style="{StaticResource CustomTextBlockStyle}" />
+                                <TextBlock Width="330" Text="{Binding FileName}" Style="{StaticResource CustomTextBlockStyle}"
+                                           TextTrimming="CharacterEllipsis">
+                                    <TextBlock.ToolTip>
+                                        <ToolTip Content="{Binding FileName}" />
+                                    </TextBlock.ToolTip>
+                                </TextBlock>
+                                <TextBlock Width="50" Text=" ➡ " />
+                                <TextBlock Width="60" Text="{Binding Status}" Style="{StaticResource CustomTextBlockStyle}" />
                             </StackPanel>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
