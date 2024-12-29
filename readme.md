@@ -47,17 +47,17 @@
 
 ## 实现过程问题
 
-1. DllNotFoundException: Unable to load DLL 'OpenCvSharpExtern' or one of its dependencies: 找不到指定的模块。 (0x8007007E)
+1. ~~DllNotFoundException: Unable to load DLL 'OpenCvSharpExtern' or one of its dependencies: 找不到指定的模块。 (0x8007007E)~~
 
    > opencvsharp依赖需要opencvsharp.runtime.win
 
-2. 运行没有反应 -- 没有捕获异常
+2. ~~运行没有反应 -- 没有捕获异常~~
 
-3. 数据更新无法及时响应到ui -- 通过获取属性的方式显示 而非tostring
+3. ~~数据更新无法及时响应到ui -- 通过获取属性的方式显示 而非tostring~~
 
-4. 主线程被阻塞问题
+4. ~~主线程被阻塞问题~~
 
-5. 缩放图片预览问题
+5. ~~缩放图片预览问题~~
 
 > 接口文档地址：https://learn.microsoft.com/zh-cn/dotnet/api
 
