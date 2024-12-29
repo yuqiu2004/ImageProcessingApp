@@ -108,7 +108,6 @@ namespace ImageProcessingApp.Views
                     item.Status = Status.FAILED;
                 }
             }
-
             StatusTextBlock.Text = "处理完成！";
             MessageBox.Show("处理完成！");
         }
