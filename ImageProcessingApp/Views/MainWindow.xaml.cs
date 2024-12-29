@@ -15,11 +15,13 @@ namespace ImageProcessingApp.Views
         public MainWindow()
         {
             InitializeComponent();
+            this.DataContext = this;
             FileListBox.ItemsSource = FileItems; // 绑定数据源
         }
 
         private ObservableCollection<FileItem> FileItems { get; set; } = new ObservableCollection<FileItem>();
 
+        // 添加文件项
         private void AddImage_Click(object sender, RoutedEventArgs e)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog
@@ -36,6 +38,7 @@ namespace ImageProcessingApp.Views
             }
         }
 
+        // 删除文件项
         private void DeleteFile_Click(object sender, RoutedEventArgs e)
         {
             var selectedItems = FileListBox.SelectedItems;
@@ -45,6 +48,7 @@ namespace ImageProcessingApp.Views
             }
         }
 
+        // 查看结果
         private void ViewResult_Click(object sender, RoutedEventArgs e)
         {
             if (FileListBox.SelectedItem != null)
@@ -57,6 +61,7 @@ namespace ImageProcessingApp.Views
             }
         }
 
+        // 开始处理
         private void StartProcessing_Click(object sender, RoutedEventArgs e)
         {
             OpenFolderDialog folder = new OpenFolderDialog()
@@ -86,34 +91,16 @@ namespace ImageProcessingApp.Views
             //string outputPath = @"C:\Users\SN\Desktop\temp";
             string outputDir = folder.FolderName;
             string mode = (ProcessingModeComboBox.SelectedItem as ComboBoxItem)?.Content.ToString();
-            for (int i = 0; i < FileListBox.Items.Count; i++)
+            for (int i = 0; i < FileItems.Count; i++)
             {
-                var item = (FileItem)FileListBox.Items[i];
+                var item = FileItems[i];
                 string inputPath = item.FilePath;
-                string outputPath = "";
-                if (mode.Equals("灰度"))
-                {
-                    outputPath = ImageProcessor.ConvertToGray(inputPath, outputDir);
-                } 
-                else if (mode.Equals("放大 200%"))
-                {
-                    outputPath = ImageProcessor.EnlargeTo200Percent(inputPath, outputDir);
-                }
-                else if (mode.Equals("缩小 50%"))
-                {
-                    outputPath = ImageProcessor.ShrinkTo50Percent(inputPath, outputDir);
-                }
-                else if (mode.Equals("顺时针旋转90°"))
-                {
-                    outputPath = ImageProcessor.RotateClockwise90(inputPath, outputDir);
-                }
-                else if (mode.Equals("逆时针旋转90°"))
-                {
-                    outputPath = ImageProcessor.RotateCounterClockwise90(inputPath, outputDir);
-                }
+                string outputPath = ProcessImage(inputPath, mode, outputDir);
+                
                 if (!String.IsNullOrEmpty(outputPath))
                 {
                     item.Status = Status.COMPLETED;
+                    item.OutputPath = outputPath;
                     ProcessingProgressBar.Value += 1;
                 }
                 else
@@ -123,9 +110,24 @@ namespace ImageProcessingApp.Views
             }
 
             StatusTextBlock.Text = "处理完成！";
-            //MessageBox.Show($"所有文件处理完成，模式：{mode}。", "提示");
+            MessageBox.Show("处理完成！");
         }
 
+        // 处理调用
+        private string ProcessImage(string inputPath, string mode, string outputDir)
+        {
+            return mode switch
+            {
+                "灰度" => ImageProcessor.ConvertToGray(inputPath, outputDir),
+                "放大 200%" => ImageProcessor.EnlargeTo200Percent(inputPath, outputDir),
+                "缩小 50%" => ImageProcessor.ShrinkTo50Percent(inputPath, outputDir),
+                "顺时针旋转90°" => ImageProcessor.RotateClockwise90(inputPath, outputDir),
+                "逆时针旋转90°" => ImageProcessor.RotateCounterClockwise90(inputPath, outputDir),
+                _ => null,
+            };
+        }
+
+        // 取消处理
         private void CancelProcessing_Click(object sender, RoutedEventArgs e)
         {
             ProcessingProgressBar.Value = 0;

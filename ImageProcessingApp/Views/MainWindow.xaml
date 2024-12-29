@@ -59,7 +59,7 @@
 
                 <!-- 进度条 -->
                 <ProgressBar x:Name="ProcessingProgressBar" HorizontalAlignment="Left"
-                             VerticalAlignment="Top" Width="300" Height="20"
+                             VerticalAlignment="Top" Width="442" Height="20"
                              Margin="20,330,0,0" />
             </Grid>
         </GroupBox>
